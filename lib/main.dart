@@ -1,16 +1,51 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 
-void main() {
-  runApp(
-    MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: Scaffold(
-        appBar: AppBar(
-          title: Text('I Am Rich'),
+Future<void> main() async {
+  // Load environment variables
+  await dotenv.load(fileName: ".env");
+
+  await SentryFlutter.init(
+    (options) {
+      options.dsn = dotenv.env['SENTRY_DSN'] ?? '';
+      // Adds request headers and IP for users, for more info visit:
+      // https://docs.sentry.io/platforms/dart/guides/flutter/data-management/data-collected/
+      options.sendDefaultPii = true;
+      // Set tracesSampleRate to 1.0 to capture 100% of transactions for tracing.
+      // We recommend adjusting this value in production.
+      options.tracesSampleRate =
+          double.parse(dotenv.env['SENTRY_TRACES_SAMPLE_RATE'] ?? '1.0');
+      // Configure Session Replay
+      options.replay.sessionSampleRate =
+          double.parse(dotenv.env['SENTRY_SESSION_SAMPLE_RATE'] ?? '0.1');
+      options.replay.onErrorSampleRate =
+          double.parse(dotenv.env['SENTRY_ERROR_SAMPLE_RATE'] ?? '1.0');
+    },
+    appRunner: () => runApp(
+      SentryWidget(
+        child: MaterialApp(
+          debugShowCheckedModeBanner: false,
+          home: Scaffold(
+            appBar: AppBar(
+              title: Text('I Am Rich'),
+              backgroundColor: Colors.blueGrey[900],
+            ),
+            body: Center(
+              child: Image(
+                image: AssetImage('images/diamond.png'),
+                // image: NetworkImage(
+                //   'https://www.w3schools.com/w3css/img_lights.jpg',
+                // ),
+              ),
+            ),
+          ),
         ),
-      )
-    )
+      ),
+    ),
   );
+  // TODO: Remove this line after sending the first sample event to sentry.
+  // await Sentry.captureException(StateError('This is a sample exception.'));
 }
 
 // class MyApp extends StatelessWidget {
@@ -21,7 +56,7 @@ void main() {
 //   Widget build(BuildContext context) {
 //     return MaterialApp(
 //       title: 'Flutter Demo',
-//       theme: ThemeData(
+//       theme: ThemeData(v
 //         // This is the theme of your application.
 //         //
 //         // TRY THIS: Try running your application with "flutter run". You'll see
@@ -130,4 +165,3 @@ void main() {
 //   }
 // }
 //
-
