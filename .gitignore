@@ -52,3 +52,5 @@ sentry.properties
 # FVM Version Cache
 .fvm/
 .vscode
+/build/*
+fastlane/build/*

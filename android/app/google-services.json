@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "732149306408",
+    "project_id": "murpheys09z",
+    "storage_bucket": "murpheys09z.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:732149306408:android:1c38e9c941428b77e4d11d",
+        "android_client_info": {
+          "package_name": "dev.iamrich.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "732149306408-5jofhqkv4u0gbjfql2lmokt23d6vqtnd.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBvkn4nIgkbvYzw6dRWbdl0_L5bm6K4s_Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "732149306408-5jofhqkv4u0gbjfql2lmokt23d6vqtnd.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

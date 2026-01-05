@@ -1,0 +1,112 @@
+name: Flutter CI (act-compatible)
+
+# This workflow is specifically designed to work with act for local testing
+# Use the main flutter_ci.yml when pushing to GitHub
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main, development ]
+
+env:
+  FLUTTER_VERSION: '3.10.3'
+
+jobs:
+  build-android-local:
+    name: Build Android APK (Local)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Show environment
+        run: |
+          echo "Working directory: $(pwd)"
+          echo "Files:"
+          ls -la
+          echo ""
+          echo "Environment:"
+          env | grep GITHUB || true
+
+      - name: Install Flutter manually
+        run: |
+          echo "Installing Flutter..."
+
+          # Check if Flutter is already in the image
+          if command -v flutter &> /dev/null; then
+            echo "Flutter already installed:"
+            flutter --version
+          else
+            echo "Downloading Flutter SDK..."
+            cd /opt
+            git clone --depth 1 --branch stable https://github.com/flutter/flutter.git
+            export PATH="$PATH:/opt/flutter/bin"
+
+            echo "Running flutter precache..."
+            flutter precache --no-ios
+
+            echo "Flutter installed:"
+            flutter --version
+          fi
+
+          # Add to PATH for subsequent steps
+          echo "/opt/flutter/bin" >> $GITHUB_PATH
+
+      - name: Flutter doctor
+        run: |
+          export PATH="$PATH:/opt/flutter/bin"
+          flutter doctor -v
+
+      - name: Install dependencies
+        run: |
+          export PATH="$PATH:/opt/flutter/bin"
+          echo "Running flutter pub get..."
+          flutter pub get
+
+      - name: Verify formatting
+        run: |
+          export PATH="$PATH:/opt/flutter/bin"
+          echo "Checking code formatting..."
+          dart format --set-exit-if-changed . || echo "⚠️  Code formatting issues found"
+        continue-on-error: true
+
+      - name: Analyze code
+        run: |
+          export PATH="$PATH:/opt/flutter/bin"
+          echo "Running flutter analyze..."
+          flutter analyze
+
+      - name: Run tests
+        run: |
+          export PATH="$PATH:/opt/flutter/bin"
+          echo "Running tests..."
+          flutter test
+        continue-on-error: true
+
+      - name: Build APK
+        run: |
+          export PATH="$PATH:/opt/flutter/bin"
+          echo "Building Android APK..."
+          flutter build apk --release
+
+      - name: List build output
+        run: |
+          echo "Build outputs:"
+          ls -lah build/app/outputs/flutter-apk/ || echo "Build directory not found"
+          echo ""
+          if [ -f "build/app/outputs/flutter-apk/app-release.apk" ]; then
+            echo "✅ APK built successfully!"
+            ls -lh build/app/outputs/flutter-apk/app-release.apk
+          else
+            echo "❌ APK not found"
+            exit 1
+          fi
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: android-apk-local
+          path: build/app/outputs/flutter-apk/app-release.apk
+          retention-days: 7
