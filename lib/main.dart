@@ -14,13 +14,16 @@ Future<void> main() async {
       options.sendDefaultPii = true;
       // Set tracesSampleRate to 1.0 to capture 100% of transactions for tracing.
       // We recommend adjusting this value in production.
-      options.tracesSampleRate =
-          double.parse(dotenv.env['SENTRY_TRACES_SAMPLE_RATE'] ?? '1.0');
+      options.tracesSampleRate = double.parse(
+        dotenv.env['SENTRY_TRACES_SAMPLE_RATE'] ?? '1.0',
+      );
       // Configure Session Replay
-      options.replay.sessionSampleRate =
-          double.parse(dotenv.env['SENTRY_SESSION_SAMPLE_RATE'] ?? '0.1');
-      options.replay.onErrorSampleRate =
-          double.parse(dotenv.env['SENTRY_ERROR_SAMPLE_RATE'] ?? '1.0');
+      options.replay.sessionSampleRate = double.parse(
+        dotenv.env['SENTRY_SESSION_SAMPLE_RATE'] ?? '0.1',
+      );
+      options.replay.onErrorSampleRate = double.parse(
+        dotenv.env['SENTRY_ERROR_SAMPLE_RATE'] ?? '1.0',
+      );
     },
     appRunner: () => runApp(
       SentryWidget(
@@ -78,6 +81,7 @@ class MyApp extends StatelessWidget {
     );
   }
 }
+
 //
 // class MyHomePage extends StatefulWidget {
 //   const MyHomePage({super.key, required this.title});

@@ -51,7 +51,7 @@ jobs:
       - name: Verify formatting
         run: |
           export PATH="$PATH:/opt/flutter/bin"
-          flutter format --set-exit-if-changed .
+          dart format --set-exit-if-changed .
         continue-on-error: true
 
       - name: Analyze code

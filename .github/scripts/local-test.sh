@@ -64,10 +64,23 @@ flutter pub get || error "Failed to get dependencies"
 
 # Verify formatting
 step "Verifying Code Formatting"
-if flutter format --set-exit-if-changed .; then
-    success "Code formatting is correct"
+# Check which format command is available
+if command -v dart &> /dev/null && dart format --help &> /dev/null; then
+    # Use dart format (newer Flutter versions 3.0+)
+    if dart format --set-exit-if-changed .; then
+        success "Code formatting is correct"
+    else
+        error "Code formatting check failed. Run: dart format ."
+    fi
+elif command -v flutter &> /dev/null && flutter format --help &> /dev/null 2>&1; then
+    # Use flutter format (older Flutter versions)
+    if flutter format --set-exit-if-changed .; then
+        success "Code formatting is correct"
+    else
+        error "Code formatting check failed. Run: flutter format ."
+    fi
 else
-    error "Code formatting check failed. Run: flutter format ."
+    warning "Format command not found. Skipping formatting check."
 fi
 
 # Analyze code
