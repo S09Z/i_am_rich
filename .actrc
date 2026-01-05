@@ -1,0 +1,17 @@
+# act configuration for local GitHub Actions testing
+# This file configures act to work properly on Apple M-series chips
+
+# Use linux/amd64 architecture (required for M1/M2/M3 Macs)
+--container-architecture linux/amd64
+
+# Use full-featured Ubuntu image with more tools
+-P ubuntu-latest=catthehacker/ubuntu:full-latest
+
+# Verbose output for debugging
+--verbose
+
+# Use host network to avoid networking issues
+--network host
+
+# Bind Docker socket if needed (uncomment if you need Docker-in-Docker)
+# --bind /var/run/docker.sock:/var/run/docker.sock

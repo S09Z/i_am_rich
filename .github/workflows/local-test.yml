@@ -1,0 +1,68 @@
+name: Local Testing (act-compatible)
+
+# This workflow is designed to work with act for local testing
+# It avoids complex actions that don't work well in Docker
+
+on:
+  workflow_dispatch:
+
+jobs:
+  quick-test:
+    name: Quick Local Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Show environment
+        run: |
+          echo "OS: $(uname -a)"
+          echo "Shell: $SHELL"
+          echo "Path: $PATH"
+          pwd
+          ls -la
+
+      - name: Install Flutter (manual)
+        run: |
+          # Check if Flutter is already installed
+          if command -v flutter &> /dev/null; then
+            echo "Flutter is already installed"
+            flutter --version
+          else
+            echo "Installing Flutter..."
+            git clone --depth 1 --branch stable https://github.com/flutter/flutter.git /opt/flutter
+            echo "/opt/flutter/bin" >> $GITHUB_PATH
+            export PATH="$PATH:/opt/flutter/bin"
+            flutter precache
+            flutter doctor
+          fi
+
+      - name: Flutter doctor
+        run: |
+          export PATH="$PATH:/opt/flutter/bin"
+          flutter doctor -v
+
+      - name: Install dependencies
+        run: |
+          export PATH="$PATH:/opt/flutter/bin"
+          flutter pub get
+
+      - name: Verify formatting
+        run: |
+          export PATH="$PATH:/opt/flutter/bin"
+          flutter format --set-exit-if-changed .
+        continue-on-error: true
+
+      - name: Analyze code
+        run: |
+          export PATH="$PATH:/opt/flutter/bin"
+          flutter analyze
+
+      - name: Run tests
+        run: |
+          export PATH="$PATH:/opt/flutter/bin"
+          flutter test
+
+      - name: Success message
+        run: echo "✅ All local tests passed!"
