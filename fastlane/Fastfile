@@ -1,0 +1,39 @@
+default_platform(:android)
+
+require 'dotenv'
+
+# Load .env from project root
+Dotenv.load('../.env')
+
+platform :android do
+  lane :check_env do
+    puts "=" * 50
+    puts "Environment Variables:"
+    puts "=" * 50
+    puts "FIREBASE_APP_ID: #{ENV['FIREBASE_APP_ID']}"
+    puts "FIREBASE_TOKEN: #{ENV['FIREBASE_TOKEN'] ? '[SET]' : '[NOT SET]'}"
+    puts "=" * 50
+  end
+  
+  lane :firebase do
+    # Check if variable exists
+    if ENV['FIREBASE_APP_ID'].nil? || ENV['FIREBASE_APP_ID'].empty?
+      UI.user_error!("❌ FIREBASE_APP_ID is not set in .env file!")
+    end
+    
+    puts "🚀 Using Firebase App ID: #{ENV['FIREBASE_APP_ID']}"
+    
+    
+    version_name = ENV['VERSION_NAME'] || "1.0.0"
+    build_number = ENV['BUILD_NUMBER'] || Time.now.strftime('%Y%m%d%H%M')
+    
+    sh("flutter", "build", "apk", "--release",
+      "--build-name=#{version_name}",
+      "--build-number=#{build_number}")
+    
+    sh("firebase", "appdistribution:distribute",
+       "../build/app/outputs/flutter-apk/app-release.apk",
+       "--app", ENV['FIREBASE_APP_ID'],
+       "--groups", "dev.tester")
+  end
+end
